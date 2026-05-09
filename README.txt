@@ -1,16 +1,17 @@
-ChatMargin static landing page
+ChatMargin landing page v0.3
 
 Files:
-- index.html: landing page
-- privacy.html: privacy policy
-- assets/chatmargin-logo.png: logo
+- index.html
+- privacy.html
+- assets/chatmargin-logo.png
+- assets/chatmargin-hero.png
 
-Before publishing:
-1. Replace the placeholder Buy Me a Coffee URL if needed:
-   https://www.buymeacoffee.com/chatmargin
-2. Replace the Chrome Web Store placeholder link in index.html once the store URL exists.
-3. Upload the files to your static host, for example GitHub Pages, Netlify, Cloudflare Pages, or Porkbun static hosting if enabled.
-4. Set https://chatmargin.app/privacy.html as the Chrome Web Store privacy policy URL.
-5. Use hello@chatmargin.app as the support/contact email.
+Update notes:
+- Removed charity/donation wording.
+- Reworded payments as optional voluntary contributions.
+- Added more product content to make the site clearer for payment-provider review.
+- Kept Buy Me a Coffee link: https://buymeacoffee.com/chatmargin
+- Contact email: hello@chatmargin.app
 
-V0.2: Added the hero visual asset (assets/chatmargin-hero.png) to the landing page.
+Deployment:
+Upload/commit these files at the root of the GitHub Pages repository.
