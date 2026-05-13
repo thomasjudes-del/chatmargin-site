@@ -1,131 +1,238 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chat Margin for ChatGPT</title>
-  <meta name="description" content="Local notes, prompt drafts and follow-up tracking for ChatGPT conversations.">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChatMargin — Local notes and prompt drafts for ChatGPT</title>
+  <meta name="description" content="ChatMargin adds local notes, prompt drafts and follow-ups next to ChatGPT conversations. Free beta. Local-first. Independent." />
+  <meta property="og:title" content="ChatMargin for ChatGPT" />
+  <meta property="og:description" content="Local notes, prompt drafts and follow-ups for people who work seriously with ChatGPT." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://chatmargin.app/" />
+  <link rel="icon" href="assets/chatmargin-logo.png" />
   <style>
     :root {
-      --navy: #111B3D;
-      --navy2: #22346F;
-      --violet: #6D5CFF;
-      --violet2: #8D7DFF;
-      --bg: #05091F;
-      --text: #FFFFFF;
-      --muted: #CDD3EC;
-      --card: rgba(255,255,255,.08);
-      --line: rgba(255,255,255,.14);
+      --ink: #16233d;
+      --ink-2: #22365f;
+      --muted: #63708a;
+      --soft: #f6f4ff;
+      --soft-2: #eeebff;
+      --violet: #6f5cff;
+      --violet-2: #4f3ee7;
+      --border: rgba(22, 35, 61, .12);
+      --shadow: 0 24px 70px rgba(22, 35, 61, .14);
+      --radius: 26px;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at 70% 20%, rgba(109,92,255,.28), transparent 28%), var(--bg);
-      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(111,92,255,.18), transparent 30%),
+        radial-gradient(circle at 90% 5%, rgba(34,54,95,.12), transparent 28%),
+        linear-gradient(180deg, #fff 0%, #f9f8ff 58%, #ffffff 100%);
+      line-height: 1.5;
     }
     a { color: inherit; }
-    .page { max-width: 1180px; margin: 0 auto; padding: 56px 24px 36px; }
-    header { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:72px; }
-    .brand { display:flex; align-items:center; gap:14px; font-weight:800; font-size:28px; letter-spacing:-.04em; }
-    .brand img { width:52px; height:52px; }
-    .brand span { color: var(--violet2); }
-    .nav { display:flex; gap:16px; color:var(--muted); font-size:15px; }
-    .hero { display:grid; grid-template-columns: 1.03fr .97fr; gap:54px; align-items:center; }
-    h1 { margin:0 0 22px; font-size:68px; line-height:1.02; letter-spacing:-.06em; }
-    h1 em { color:var(--violet2); font-style:normal; }
-    .lead { color:var(--muted); font-size:23px; line-height:1.5; max-width:610px; }
-    .actions { margin-top:34px; display:flex; gap:14px; flex-wrap:wrap; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; padding:15px 22px; border-radius:14px; font-weight:800; text-decoration:none; background:var(--violet); color:white; box-shadow:0 12px 36px rgba(109,92,255,.32); }
-    .btn.secondary { background:white; color:var(--navy); box-shadow:none; }
-    .mock { background:white; color:var(--navy); border-radius:28px; padding:18px; box-shadow:0 0 44px rgba(109,92,255,.36); border:1px solid rgba(255,255,255,.35); }
-    .mock-head { background:var(--navy2); color:white; padding:18px; border-radius:18px 18px 0 0; font-weight:800; display:flex; align-items:center; gap:10px; }
-    .dot { width:12px; height:12px; border-radius:50%; background:#35C759; }
-    .tabs { display:flex; gap:8px; background:#F3F4FF; padding:10px; color:#42496C; font-weight:750; }
-    .tab { background:white; color:var(--navy); padding:10px 18px; border-radius:11px; border:1px solid #D9DDF9; }
-    .mock-body { padding:28px; min-height:320px; background:#fff; }
-    .item { display:flex; align-items:flex-start; gap:12px; margin:15px 0; color:#22263D; }
-    .box { width:15px; height:15px; border:2px solid #B9BFF0; border-radius:4px; margin-top:4px; }
-    .prompt { border:1px solid #D8DDF2; background:#FAFAFF; border-radius:12px; padding:12px 14px; margin:10px 0; }
-    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:78px; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:26px; }
-    .card h2 { margin:0 0 10px; font-size:24px; }
-    .card p { color:var(--muted); line-height:1.55; margin:0; }
-    .privacy { margin-top:72px; padding:28px; border-radius:24px; background:rgba(255,255,255,.06); border:1px solid var(--line); }
-    .privacy h2 { margin-top:0; }
-    .privacy p { color:var(--muted); line-height:1.6; }
-    footer { margin-top:48px; color:#AEB7DB; display:flex; flex-wrap:wrap; gap:18px; font-size:15px; }
-    @media (max-width: 900px) {
-      .hero, .grid { grid-template-columns:1fr; }
-      h1 { font-size:46px; }
-      header { align-items:flex-start; flex-direction:column; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+    header {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(16px);
+      background: rgba(255,255,255,.78);
+      border-bottom: 1px solid rgba(22,35,61,.08);
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 18px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 850; letter-spacing: -0.03em; }
+    .brand img { width: 36px; height: 36px; display: block; }
+    .brand span { font-size: 18px; }
+    .links { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 14px; }
+    .links a { text-decoration: none; }
+    .links a:hover { color: var(--ink); }
+    .hero { padding: 88px 0 74px; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(360px, .98fr); gap: 46px; align-items: center; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid rgba(111,92,255,.22); border-radius: 999px; background: rgba(111,92,255,.08); color: var(--violet-2); font-weight: 700; font-size: 13px; }
+    h1 { margin: 20px 0 18px; font-size: clamp(42px, 7vw, 78px); line-height: .94; letter-spacing: -0.065em; }
+    .lead { margin: 0; max-width: 690px; color: #475672; font-size: clamp(18px, 2vw, 22px); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 18px; border-radius: 14px; border: 1px solid transparent; text-decoration: none; font-weight: 800; font-size: 14px; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, var(--ink-2), #354899); color: white; box-shadow: 0 14px 28px rgba(34,54,95,.22); }
+    .btn-violet { background: var(--violet); color: white; box-shadow: 0 14px 28px rgba(111,92,255,.22); }
+    .btn-secondary { background: white; color: var(--ink); border-color: var(--border); }
+    .note { margin-top: 14px; color: var(--muted); font-size: 13px; }
+    .hero-visual { border: 1px solid rgba(111,92,255,.30); border-radius: 28px; background: #050b2a; box-shadow: var(--shadow), 0 0 0 5px rgba(111,92,255,.08); overflow: hidden; }
+    .hero-visual img { display: block; width: 100%; height: auto; }
+    .mockup { border: 1px solid rgba(111,92,255,.28); border-radius: 28px; background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(246,244,255,.95)); box-shadow: var(--shadow), 0 0 0 5px rgba(111,92,255,.06); overflow: hidden; }
+    .mock-header { background: linear-gradient(135deg, #1d2f57 0%, #253a69 70%, #4444ad 100%); color: white; padding: 18px; display: flex; align-items: center; justify-content: space-between; }
+    .mock-title { display: flex; align-items: center; gap: 10px; font-weight: 850; }
+    .mock-title img { width: 32px; height: 32px; }
+    .dots { display: flex; gap: 6px; opacity: .8; }
+    .dots span { width: 8px; height: 8px; background: rgba(255,255,255,.65); border-radius: 50%; }
+    .mock-body { padding: 16px; }
+    .conversation { padding: 12px 12px 14px; border-bottom: 1px solid rgba(22,35,61,.08); }
+    .conversation strong { display: block; font-size: 14px; }
+    .conversation small { color: var(--muted); }
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; background: var(--soft-2); }
+    .tab { border-radius: 12px; padding: 8px 10px; text-align: center; font-size: 13px; font-weight: 800; color: #53617c; }
+    .tab.active { background: white; color: var(--ink); box-shadow: 0 2px 10px rgba(22,35,61,.08); }
+    .cards { padding: 14px 12px 4px; display: grid; gap: 10px; }
+    .line-card { background: white; border: 1px solid rgba(22,35,61,.08); border-radius: 16px; padding: 13px 14px; color: #4b5870; font-size: 14px; }
+    .line-card strong { color: var(--ink); }
+    .mock-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: linear-gradient(180deg, #f7f5ff, #efecff); color: #5c6880; font-size: 12px; }
+    .follow { padding: 7px 10px; border-radius: 999px; background: rgba(111,92,255,.12); color: var(--violet-2); font-weight: 800; }
+    section { padding: 74px 0; }
+    .section-head { max-width: 720px; margin-bottom: 30px; }
+    .eyebrow { color: var(--violet-2); font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
+    h2 { margin: 10px 0 12px; font-size: clamp(30px, 4vw, 48px); line-height: 1.02; letter-spacing: -0.045em; }
+    .section-head p { color: var(--muted); font-size: 18px; margin: 0; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature { background: rgba(255,255,255,.86); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 14px 34px rgba(22,35,61,.07); }
+    .icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(111,92,255,.12); color: var(--violet-2); font-weight: 900; margin-bottom: 16px; }
+    .feature h3 { margin: 0 0 10px; font-size: 20px; letter-spacing: -0.025em; }
+    .feature p { margin: 0; color: var(--muted); }
+    .split { display: grid; grid-template-columns: .9fr 1.1fr; gap: 28px; align-items: stretch; }
+    .panel { background: linear-gradient(180deg, white, #faf9ff); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: 0 18px 44px rgba(22,35,61,.08); }
+    .panel ul { margin: 16px 0 0; padding-left: 20px; color: var(--muted); }
+    .panel li { margin: 10px 0; }
+    .support { background: linear-gradient(135deg, #1c2e55, #342f86 70%, #6f5cff); color: white; border-radius: 34px; padding: 44px; box-shadow: var(--shadow); display: grid; grid-template-columns: 1.1fr .9fr; gap: 28px; align-items: center; }
+    .support h2 { color: white; margin-top: 0; }
+    .support p { color: rgba(255,255,255,.78); font-size: 17px; }
+    .support-box { background: rgba(255,255,255,.11); border: 1px solid rgba(255,255,255,.18); border-radius: 24px; padding: 22px; }
+    .support-box strong { display: block; margin-bottom: 8px; }
+    footer { padding: 42px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+    .footer-grid { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    footer a { color: var(--ink); text-decoration: none; font-weight: 700; margin-left: 16px; }
+    @media (max-width: 880px) {
+      .hero-grid, .split, .support { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .links { display: none; }
+      .hero { padding-top: 58px; }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <header>
-      <div class="brand">
-        <img src="assets/chatmargin-logo.png" alt="Chat Margin logo">
-        <div>Chat <span>Margin</span></div>
-      </div>
-      <nav class="nav">
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="/" aria-label="ChatMargin home"><img src="assets/chatmargin-logo.png" alt="" /><span>ChatMargin</span></a>
+      <nav class="links" aria-label="Main navigation">
         <a href="#features">Features</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="mailto:hello@chatmargin.app">Contact</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#support">Support</a>
+        <a href="privacy.html">Privacy Policy</a>
       </nav>
-    </header>
+    </div>
+  </header>
 
+  <main>
     <section class="hero">
-      <div>
-        <h1>Take notes. Draft prompts. <em>Track follow-ups.</em></h1>
-        <p class="lead">Chat Margin adds a local workspace next to ChatGPT conversations so you can stay organized across long chats.</p>
-        <div class="actions">
-          <a class="btn" href="https://chromewebstore.google.com/detail/chat-margin-for-chatgpt/fnickbjgphdehoelanbchadempnlmmpc" target="_blank" rel="noopener">Add to Chrome</a>
-          <a class="btn secondary" href="privacy.html">Privacy Policy</a>
+      <div class="wrap hero-grid">
+        <div>
+          <span class="pill">Free beta · Local-first · Built for ChatGPT power users</span>
+          <h1>Keep your thinking next to your ChatGPT conversations.</h1>
+          <p class="lead">ChatMargin adds a lightweight sidebar to ChatGPT for local notes, prompt drafts and follow-ups. Stop losing track of where you were, what remains to do, and which conversations matter. The beta is free to use, with optional voluntary contributions for people who want to support ongoing development.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="https://chromewebstore.google.com/detail/chat-margin-for-chatgpt/fnickbjgphdehoelanbchadempnlmmpc" target="_blank" rel="noopener" aria-disabled="true">Add to Chrome</a>
+            <a class="btn btn-violet" href="https://www.buymeacoffee.com/chatmargin" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+            <a class="btn btn-secondary" href="mailto:hello@chatmargin.app?subject=ChatMargin%20feedback">Send feedback</a>
+          </div>
+          <p class="note">Official website: <a href="https://chatmargin.app">chatmargin.app</a>. Independent tool. Not affiliated with OpenAI or ChatGPT. Currently free while we improve it with early users.</p>
         </div>
-      </div>
-
-      <div class="mock" aria-label="Chat Margin product preview">
-        <div class="mock-head"><span class="dot"></span> Chat Margin / local workspace</div>
-        <div class="tabs"><div class="tab">Notes ✏</div><div>Prompts 💬</div><div>Dashboard 📊</div></div>
-        <div class="mock-body">
-          <strong>Weekend trip ideas</strong>
-          <div class="item"><span class="box"></span><span>Capture key ideas while working in ChatGPT</span></div>
-          <div class="item"><span class="box"></span><span>Prepare prompts before sending them</span></div>
-          <div class="item"><span class="box"></span><span>Mark conversations as Follow-up</span></div>
-          <div class="prompt"><strong>Prompt draft</strong><br>Summarize the key decisions and propose next actions.</div>
-          <div class="prompt"><strong>Follow-up</strong><br>Find unfinished conversations later in the dashboard.</div>
+        <div class="hero-visual" aria-label="ChatMargin product preview">
+          <img src="assets/chatmargin-hero.png" alt="ChatMargin adds notes, prompts and a dashboard next to ChatGPT conversations." />
         </div>
       </div>
     </section>
 
-    <section id="features" class="grid">
-      <div class="card">
-        <h2>Notes</h2>
-        <p>Keep lightweight local notes attached to the ChatGPT conversation you are working on.</p>
-      </div>
-      <div class="card">
-        <h2>Prompt drafts</h2>
-        <p>Prepare prompts before sending them, use voice input, and copy when ready.</p>
-      </div>
-      <div class="card">
-        <h2>Follow-up dashboard</h2>
-        <p>Mark unfinished conversations and find the work that still needs your attention.</p>
+
+    <section id="product">
+      <div class="wrap split">
+        <div class="section-head">
+          <div class="eyebrow">Product</div>
+          <h2>A local workspace for ChatGPT users.</h2>
+          <p>ChatMargin is a browser extension for people who use ChatGPT across long, complex or unfinished conversations.</p>
+        </div>
+        <div class="panel">
+          <ul>
+            <li><strong>What it is:</strong> a local sidebar that appears next to ChatGPT conversations.</li>
+            <li><strong>What it does:</strong> lets you keep notes, prepare prompts and track follow-up conversations.</li>
+            <li><strong>Who it is for:</strong> heavy ChatGPT users, consultants, researchers, founders, builders and writers.</li>
+            <li><strong>Current status:</strong> free beta, with optional voluntary contributions to support development.</li>
+          </ul>
+        </div>
       </div>
     </section>
 
-    <section class="privacy">
-      <h2>Local-first beta</h2>
-      <p>Chat Margin stores notes, prompt drafts, follow-up status and preferences locally in your browser. It does not require a Chat Margin account and does not send your notes to a Chat Margin server.</p>
-      <p>Chat Margin is an independent browser extension and is not affiliated with, endorsed by, or sponsored by OpenAI or ChatGPT.</p>
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Why it exists</div>
+          <h2>ChatGPT is powerful. Long conversations are messy.</h2>
+          <p>ChatMargin is for people who use ChatGPT as a serious work surface: consultants, builders, researchers, founders, writers and AI-heavy teams.</p>
+        </div>
+        <div class="grid-3">
+          <article class="feature">
+            <div class="icon">✏️</div>
+            <h3>Notes per conversation</h3>
+            <p>Capture context, decisions, loose ideas and next steps directly next to the conversation where they belong.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">💬</div>
+            <h3>Prompt drafts</h3>
+            <p>Prepare prompts before sending them. Dictate, copy, and keep a simple record of what you already used.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">📊</div>
+            <h3>Follow-up dashboard</h3>
+            <p>Mark conversations as unfinished and return to them later from a local dashboard.</p>
+          </article>
+        </div>
+      </div>
     </section>
 
-    <footer>
-      <a href="https://chromewebstore.google.com/detail/chat-margin-for-chatgpt/fnickbjgphdehoelanbchadempnlmmpc" target="_blank" rel="noopener">Chrome Web Store</a>
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="mailto:hello@chatmargin.app">hello@chatmargin.app</a>
-    </footer>
+    <section id="privacy">
+      <div class="wrap split">
+        <div class="section-head">
+          <div class="eyebrow">Local-first</div>
+          <h2>Your notes stay in your browser.</h2>
+          <p>ChatMargin is designed to be useful without accounts, servers or hidden data collection.</p>
+        </div>
+        <div class="panel">
+          <ul>
+            <li>Notes and prompt drafts are stored locally in your browser extension storage.</li>
+            <li>There is no ChatMargin account and no ChatMargin server in the beta.</li>
+            <li>We do not sell user data.</li>
+            <li>Feedback is only sent when you deliberately email us.</li>
+            <li>See the <a href="privacy.html">Privacy Policy</a> for the full wording.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap support" id="support">
+        <div>
+          <h2>Free while we build with early users.</h2>
+          <p>ChatMargin is currently a free beta. If it helps you work better with ChatGPT, you can make an optional voluntary contribution to support ongoing development. This is a voluntary creator contribution and it does not unlock paid features in the beta.</p>
+          <div class="actions">
+            <a class="btn btn-violet" href="https://www.buymeacoffee.com/chatmargin" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+            <a class="btn btn-secondary" href="mailto:hello@chatmargin.app?subject=ChatMargin%20feedback">Send feedback</a>
+          </div>
+        </div>
+        <div class="support-box">
+          <strong>What contributions support</strong>
+          <p>Bug fixes, better export, richer dashboards, cross-LLM support, smarter summaries and future pro features for heavy users.</p>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <div class="wrap footer-grid">
+      <div>© <span id="year"></span> ChatMargin. Independent tool, not affiliated with OpenAI or ChatGPT.</div>
+      <div><a href="mailto:hello@chatmargin.app">Contact</a><a href="privacy.html">Privacy Policy</a></div>
+    </div>
+  </footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>
