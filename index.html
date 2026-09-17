@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ChatMargin | Notes, prompts and workspace for ChatGPT</title>
   <meta name="description" content="ChatMargin is a local-first Chrome extension for ChatGPT with persistent notes, reusable prompts, follow-ups, search and a full workspace beside your chats." />
-  <meta name="robots" content="index,follow" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
   <link rel="canonical" href="https://chatmargin.app/" />
   <link rel="icon" href="/assets/chatmargin-logo.png" />
   <link rel="stylesheet" href="/assets/site.css" />
+  <link rel="stylesheet" href="/assets/demo.css" />
   <meta property="og:title" content="ChatMargin | A workspace that lives next to ChatGPT" />
   <meta property="og:description" content="Persistent notes, reusable prompts, follow-ups, search and a full workspace beside ChatGPT conversations." />
   <meta property="og:type" content="website" />
@@ -26,11 +27,7 @@
     "description": "A local-first Chrome extension that adds persistent notes, reusable prompts, follow-ups, search and a workspace beside ChatGPT.",
     "downloadUrl": "https://chromewebstore.google.com/detail/chat-margin-for-chatgpt/fnickbjgphdehoelanbchadempnlmmpc",
     "isAccessibleForFree": true,
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
+    "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
     "featureList": [
       "Persistent notes attached to ChatGPT conversations",
       "Rich text notes with sub-pages",
@@ -70,25 +67,74 @@
           <p class="note">Currently free. No ChatMargin account. Your ChatMargin notes, prompts and follow-up data are stored in Chrome extension storage.</p>
         </div>
 
-        <div class="product-window" aria-label="Illustration of the ChatMargin workspace beside a ChatGPT conversation">
-          <div class="window-top">
-            <div class="window-brand"><img src="/assets/chatmargin-logo.png" alt="" />ChatMargin</div>
-            <div class="window-chat">Current conversation</div>
+        <div class="demo-shell" id="product-demo" aria-label="Interactive product demo of ChatMargin v0.60">
+          <div class="chrome-bar">
+            <div class="traffic" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="chrome-tabs">
+              <button class="chrome-tab active" type="button" data-browser-tab="chatgpt"><span class="chatgpt-mark">✦</span> ChatGPT</button>
+              <button class="chrome-tab workspace-tab" type="button" data-browser-tab="workspace">CM ChatMargin Workspace</button>
+            </div>
+            <div class="chrome-address">chatgpt.com</div>
+            <div class="chrome-menu">⋮</div>
           </div>
-          <div class="window-tabs">
-            <div class="window-tab active">Notes</div>
-            <div class="window-tab">Prompts</div>
-            <div class="window-tab">Dashboard</div>
-            <div class="window-tab">Search</div>
+
+          <div class="demo-stage" data-demo-screen="chatgpt">
+            <div class="chatgpt-app">
+              <aside class="chat-sidebar">
+                <div class="chatgpt-name"><span class="chatgpt-mark">✦</span><strong>ChatGPT</strong></div>
+                <button type="button" class="new-chat">+ New chat</button>
+                <div class="side-label">PROJECTS</div>
+                <div class="side-item active">▣ Product launch</div>
+                <div class="side-item">▣ Research</div>
+                <div class="side-label">CHATS</div>
+                <div class="side-item chat-title-side">Website launch plan</div>
+                <div class="side-item">User interviews</div>
+              </aside>
+
+              <div class="chat-main">
+                <div class="chat-header"><span class="chatgpt-mark">✦</span> ChatGPT</div>
+                <div class="chat-thread">
+                  <div class="chat-title">Website launch plan</div>
+                  <div class="message user">We need a lean launch plan for ChatMargin. What should we prioritize first?</div>
+                  <div class="message assistant"><span class="avatar">✦</span><p>Start with Chrome and Chromium, focus on heavy ChatGPT users, and learn from the first active users before expanding.</p></div>
+                  <div class="message user second-user">Good. Turn that into concrete actions and track what remains open.</div>
+                  <div class="message assistant second-assistant"><span class="avatar">✦</span><p><strong>Actions:</strong> tighten onboarding, instrument feedback, interview users and publish a local-first trust page.<br><br><strong>Risk:</strong> adding too many features before the core workflow is obvious.</p></div>
+                </div>
+                <div class="composer"><span class="composer-text">Ask anything</span><button type="button">↑</button></div>
+              </div>
+
+              <aside class="cm-panel">
+                <div class="cm-header">
+                  <div class="cm-brand"><img src="/assets/chatmargin-logo.png" alt="" /><strong>Chat Margin <span>v0.60</span></strong></div>
+                  <div class="cm-actions"><button title="Help">?</button><button title="Open notes in full page" data-open-workspace>↗</button><button title="Duplicate">▣</button><button title="Minimize">−</button></div>
+                  <div class="cm-context"><span class="status-dot"></span><div><small>Product launch</small><strong class="cm-context-title">Website launch plan</strong></div></div>
+                </div>
+                <div class="cm-tabs" role="tablist" aria-label="Demo sections">
+                  <button type="button" class="cm-tab active" data-demo-tab="notes">Notes ✎</button>
+                  <button type="button" class="cm-tab" data-demo-tab="prompts">Prompts ▣</button>
+                  <button type="button" class="cm-tab" data-demo-tab="dashboard">Dashboard ▥</button>
+                  <button type="button" class="cm-tab" data-demo-tab="search">Search ⌕</button>
+                </div>
+                <div class="cm-subtabs"><button class="active" type="button">Main</button><button type="button" class="subpage-btn">User feedback</button><button type="button" class="add-subpage">+</button></div>
+                <div class="cm-body" aria-live="polite"></div>
+                <div class="cm-footer"><div><strong>Saved locally</strong><span class="saved-status">Saved just now</span></div><div class="priority">Priority <span class="priority-clear">×</span><i></i><i></i><i></i></div></div>
+              </aside>
+            </div>
+
+            <div class="cursor" aria-hidden="true"><span class="arrow">➤</span><span class="hand">☝</span></div>
           </div>
-          <div class="window-body">
-            <div class="mini-card"><strong>Persistent notes</strong><span>Keep decisions, ideas and next steps attached to this chat.</span></div>
-            <div class="mini-card"><strong>Structured sub-pages</strong><span>Split complex work into pages without leaving the conversation.</span></div>
-            <div class="mini-card"><strong>Full Workspace</strong><span>Open the same note in a larger writing surface when the sidebar gets too small.</span></div>
+
+          <div class="demo-stage workspace-screen" data-demo-screen="workspace" hidden>
+            <div class="workspace-full">
+              <div class="workspace-top"><div class="cm-brand"><img src="/assets/chatmargin-logo.png" alt="" /><strong>Chat Margin Workspace</strong></div><div class="workspace-actions">Saved locally · Close ×</div></div>
+              <div class="workspace-layout">
+                <aside><div class="side-label">PAGES</div><button class="active">Main</button><button>User feedback</button><button>Launch checklist</button></aside>
+                <article><small>Website launch plan</small><h2>Launch decisions</h2><p>Keep the launch simple and learn from real use.</p><h3>Priority actions</h3><ul><li><strong>Start with Chrome and Chromium</strong> and focus on heavy ChatGPT users.</li><li>Publish onboarding and local-first trust messaging.</li><li>Track the first users and capture recurring workflow pain.</li></ul><h3>Checklist</h3><label><input type="checkbox" checked /> Refresh website positioning</label><label><input type="checkbox" /> Interview active users</label><label><input type="checkbox" /> Review Chrome Web Store listing</label></article>
+              </div>
+            </div>
           </div>
-          <div class="window-bottom">
-            <span class="chip">Local-first</span><span class="chip">Context Checkpoint</span><span class="chip">Follow-up</span>
-          </div>
+
+          <div class="demo-caption"><span class="demo-status">Notes: capture and structure context beside the chat.</span><div class="demo-progress"><i></i><i></i><i></i><i></i></div></div>
         </div>
       </div>
     </section>
@@ -101,36 +147,12 @@
           <p>ChatMargin is built for people who use ChatGPT across long, complex or unfinished work and need a lightweight system for everything that should stay beside the chat.</p>
         </div>
         <div class="grid-3">
-          <article class="feature">
-            <span class="feature-tag">Notes</span>
-            <h3>Keep notes attached to each conversation</h3>
-            <p>Capture decisions, context and next steps with rich formatting, headings, lists, checklists, links and separate sub-pages.</p>
-          </article>
-          <article class="feature">
-            <span class="feature-tag">Prompts</span>
-            <h3>Save, reorder and reuse prompts</h3>
-            <p>Keep prompts close to the work, reorder your custom prompts and insert them directly into the ChatGPT composer when needed.</p>
-          </article>
-          <article class="feature">
-            <span class="feature-tag">Dashboard</span>
-            <h3>Remember what still needs attention</h3>
-            <p>Mark conversations for follow-up, assign priority and return to unfinished work from a dedicated dashboard.</p>
-          </article>
-          <article class="feature">
-            <span class="feature-tag">Search</span>
-            <h3>Find the material around your chats</h3>
-            <p>Search across known conversation metadata, ChatMargin notes, note sub-pages and prompts without digging through your own side notes manually.</p>
-          </article>
-          <article class="feature">
-            <span class="feature-tag">Workspace</span>
-            <h3>Move from sidebar to a full writing surface</h3>
-            <p>Open your note in a larger Workspace view while keeping it tied to the same conversation and synchronized with the sidebar.</p>
-          </article>
-          <article class="feature">
-            <span class="feature-tag">Continuity</span>
-            <h3>Use Context Checkpoint in long chats</h3>
-            <p>Context Checkpoint is available from each conversation as a dedicated continuity tool when your work has become long or complex.</p>
-          </article>
+          <article class="feature"><span class="feature-tag">Notes</span><h3>Keep notes attached to each conversation</h3><p>Capture decisions, context and next steps with rich formatting, headings, lists, checklists, links and separate sub-pages.</p></article>
+          <article class="feature"><span class="feature-tag">Prompts</span><h3>Save, reorder and reuse prompts</h3><p>Keep prompts close to the work, reorder your custom prompts and insert them directly into the ChatGPT composer when needed.</p></article>
+          <article class="feature"><span class="feature-tag">Dashboard</span><h3>Remember what still needs attention</h3><p>Mark conversations for follow-up, assign priority and return to unfinished work from a dedicated dashboard.</p></article>
+          <article class="feature"><span class="feature-tag">Search</span><h3>Find the material around your chats</h3><p>Search across known conversation metadata, ChatMargin notes, note sub-pages and prompts without digging through your own side notes manually.</p></article>
+          <article class="feature"><span class="feature-tag">Workspace</span><h3>Move from sidebar to a full writing surface</h3><p>Open your note in a larger Workspace view while keeping it tied to the same conversation and synchronized with the sidebar.</p></article>
+          <article class="feature"><span class="feature-tag">Continuity</span><h3>Use Context Checkpoint in long chats</h3><p>Context Checkpoint is available from each conversation as a dedicated continuity tool when your work has become long or complex.</p></article>
         </div>
       </div>
     </section>
@@ -143,46 +165,18 @@
           <p>These guides explain the main ChatGPT workflow problems ChatMargin addresses, with the limits of the product stated clearly.</p>
         </div>
         <div class="intent-grid">
-          <a class="link-card" href="/notes-for-chatgpt/">
-            <small>Guide</small>
-            <h3>How to take persistent notes beside ChatGPT</h3>
-            <p>Keep notes linked to a specific chat, structure them with sub-pages and open them in a larger Workspace.</p>
-          </a>
-          <a class="link-card" href="/chatgpt-prompt-manager/">
-            <small>Guide</small>
-            <h3>How to save and reuse prompts in ChatGPT</h3>
-            <p>Build a lightweight prompt library, reorder saved prompts and insert them into the composer.</p>
-          </a>
-          <a class="link-card" href="/organize-chatgpt-conversations/">
-            <small>Guide</small>
-            <h3>How to organize unfinished ChatGPT conversations</h3>
-            <p>Use follow-up status, priorities, Dashboard and Search to keep track of work that is not finished yet.</p>
-          </a>
-          <a class="link-card" href="/chatgpt-workspace/">
-            <small>Guide</small>
-            <h3>How to add a working notebook beside ChatGPT</h3>
-            <p>Use the sidebar for quick capture, then expand the same content into a full Workspace when the task gets bigger.</p>
-          </a>
+          <a class="link-card" href="/notes-for-chatgpt/"><small>Guide</small><h3>How to take persistent notes beside ChatGPT</h3><p>Keep notes linked to a specific chat, structure them with sub-pages and open them in a larger Workspace.</p></a>
+          <a class="link-card" href="/chatgpt-prompt-manager/"><small>Guide</small><h3>How to save and reuse prompts in ChatGPT</h3><p>Build a lightweight prompt library, reorder saved prompts and insert them into the composer.</p></a>
+          <a class="link-card" href="/organize-chatgpt-conversations/"><small>Guide</small><h3>How to organize unfinished ChatGPT conversations</h3><p>Use follow-up status, priorities, Dashboard and Search to keep track of work that is not finished yet.</p></a>
+          <a class="link-card" href="/chatgpt-workspace/"><small>Guide</small><h3>How to add a working notebook beside ChatGPT</h3><p>Use the sidebar for quick capture, then expand the same content into a full Workspace when the task gets bigger.</p></a>
         </div>
       </div>
     </section>
 
     <section id="privacy">
       <div class="wrap grid-2">
-        <div class="section-head">
-          <div class="eyebrow">Local-first</div>
-          <h2>Your ChatMargin data stays in your browser.</h2>
-          <p>ChatMargin is designed to work without a ChatMargin account or a ChatMargin backend storing your notes.</p>
-        </div>
-        <div class="panel">
-          <ul>
-            <li><strong>Local storage:</strong> ChatMargin notes, prompts, follow-up data and related metadata use Chrome extension storage.</li>
-            <li><strong>No ChatMargin account:</strong> the current product does not require you to create an account.</li>
-            <li><strong>Not a transcript archive:</strong> ChatMargin does not position itself as a replacement for ChatGPT conversation history or as a full-chat backup tool.</li>
-            <li><strong>Independent product:</strong> ChatMargin is not affiliated with OpenAI or ChatGPT.</li>
-            <li>Read the full <a href="/privacy.html">Privacy Policy</a>.</li>
-          </ul>
-        </div>
+        <div class="section-head"><div class="eyebrow">Local-first</div><h2>Your ChatMargin data stays in your browser.</h2><p>ChatMargin is designed to work without a ChatMargin account or a ChatMargin backend storing your notes.</p></div>
+        <div class="panel"><ul><li><strong>Local storage:</strong> ChatMargin notes, prompts, follow-up data and related metadata use Chrome extension storage.</li><li><strong>No ChatMargin account:</strong> the current product does not require you to create an account.</li><li><strong>Not a transcript archive:</strong> ChatMargin does not position itself as a replacement for ChatGPT conversation history or as a full-chat backup tool.</li><li><strong>Independent product:</strong> ChatMargin is not affiliated with OpenAI or ChatGPT.</li><li>Read the full <a href="/privacy.html">Privacy Policy</a>.</li></ul></div>
       </div>
     </section>
 
@@ -190,21 +184,13 @@
       <div class="wrap band">
         <h2>Make long ChatGPT work easier to resume.</h2>
         <p>If your problem sounds like "I need notes beside ChatGPT", "I keep losing prompts", or "I forget which chats I need to come back to", ChatMargin is built around exactly that workflow.</p>
-        <div class="actions">
-          <a class="btn btn-violet" href="https://chromewebstore.google.com/detail/chat-margin-for-chatgpt/fnickbjgphdehoelanbchadempnlmmpc" target="_blank" rel="noopener">Install from Chrome Web Store</a>
-          <a class="btn btn-secondary" href="/faq/">Read the FAQ</a>
-          <a class="btn btn-secondary" href="mailto:hello@chatmargin.app?subject=ChatMargin%20feedback">Send feedback</a>
-        </div>
+        <div class="actions"><a class="btn btn-violet" href="https://chromewebstore.google.com/detail/chat-margin-for-chatgpt/fnickbjgphdehoelanbchadempnlmmpc" target="_blank" rel="noopener">Install from Chrome Web Store</a><a class="btn btn-secondary" href="/faq/">Read the FAQ</a><a class="btn btn-secondary" href="mailto:hello@chatmargin.app?subject=ChatMargin%20feedback">Send feedback</a></div>
       </div>
     </section>
   </main>
 
-  <footer>
-    <div class="wrap footer-grid">
-      <div>© <span id="year"></span> ChatMargin. Independent tool, not affiliated with OpenAI or ChatGPT.</div>
-      <div class="footer-links"><a href="/notes-for-chatgpt/">Notes</a><a href="/chatgpt-prompt-manager/">Prompts</a><a href="/organize-chatgpt-conversations/">Organization</a><a href="/chatgpt-workspace/">Workspace</a><a href="/faq/">FAQ</a><a href="/privacy.html">Privacy</a></div>
-    </div>
-  </footer>
+  <footer><div class="wrap footer-grid"><div>© <span id="year"></span> ChatMargin. Independent tool, not affiliated with OpenAI or ChatGPT.</div><div class="footer-links"><a href="/notes-for-chatgpt/">Notes</a><a href="/chatgpt-prompt-manager/">Prompts</a><a href="/organize-chatgpt-conversations/">Organization</a><a href="/chatgpt-workspace/">Workspace</a><a href="/faq/">FAQ</a><a href="/privacy.html">Privacy</a></div></div></footer>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script src="/assets/demo.js" defer></script>
 </body>
 </html>
