@@ -3,10 +3,14 @@ const cursor=$('#demoCursor'), progress=$('#progressBar'), toast=$('#toast');
 let runId=0;
 let activeScenario='notes';
 
+const cursorArrow=cursor.querySelector('.cursor-arrow');
+cursorArrow.innerHTML=`<svg viewBox="0 0 24 30" width="24" height="30" aria-hidden="true"><path d="M2.2 1.8V23.9L7.8 18.7L12.2 28.4L16.5 26.4L12.2 17.1H20.2L2.2 1.8Z" fill="#111827" stroke="#ffffff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+
 const demoStyle=document.createElement('style');
 demoStyle.textContent=`
-.demo-cursor{width:28px!important;height:34px!important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))!important}
-.cursor-arrow{width:28px!important;height:34px!important;border:0!important;transform:none!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='34' viewBox='0 0 28 34'%3E%3Cpath d='M3 2 L3 27 L9.4 20.6 L14.6 32 L20.4 29.4 L15.3 18.5 L25 18.5 Z' fill='white' stroke='%23111827' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E")!important}
+.demo-cursor{width:24px!important;height:30px!important;filter:drop-shadow(0 2px 2px rgba(0,0,0,.22))!important}
+.cursor-arrow{width:24px!important;height:30px!important;border:0!important;transform:none!important;background:none!important;position:relative!important}
+.cursor-arrow svg{display:block!important;width:24px!important;height:30px!important}
 .cursor-arrow:after{display:none!important}
 .cm-tabs .cm-tab{cursor:pointer!important;border-width:1px!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease!important}
 .cm-tabs .cm-tab:nth-child(1){background:rgba(114,97,255,.08);border-color:rgba(114,97,255,.18)}
@@ -27,7 +31,7 @@ const scenarioCopy={
 };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function setPanel(name){$$('.cm-tab').forEach(t=>t.classList.toggle('active',t.dataset.panel===name));$$('.cm-view').forEach(v=>v.classList.toggle('active',v.dataset.view===name));}
-function pointTo(el,offsetX=.5,offsetY=.5){const stage=$('#appStage').getBoundingClientRect(), r=el.getBoundingClientRect();cursor.style.left=`${r.left-stage.left+r.width*offsetX-4}px`;cursor.style.top=`${r.top-stage.top+r.height*offsetY-3}px`;}
+function pointTo(el,offsetX=.5,offsetY=.5){const stage=$('#appStage').getBoundingClientRect(), r=el.getBoundingClientRect();cursor.style.left=`${r.left-stage.left+r.width*offsetX-3}px`;cursor.style.top=`${r.top-stage.top+r.height*offsetY-2}px`;}
 async function move(el,ms=700){pointTo(el);await sleep(ms)}
 async function click(el){pointTo(el);await sleep(380);cursor.classList.remove('click');void cursor.offsetWidth;cursor.classList.add('click');el.classList.add('demo-click');await sleep(280);el.classList.remove('demo-click')}
 function setProgress(v){progress.style.width=`${v}%`}
