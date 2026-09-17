@@ -9,7 +9,6 @@
   const progress = [...demo.querySelectorAll('.demo-progress i')];
   const cursor = demo.querySelector('.cursor');
   const arrow = cursor.querySelector('.arrow');
-  const hand = cursor.querySelector('.hand');
   const chatTitle = demo.querySelector('.chat-title');
   const sideChatTitle = demo.querySelector('.chat-title-side');
   const contextTitle = demo.querySelector('.cm-context-title');
@@ -23,7 +22,83 @@
   const chromeTabs = [...demo.querySelectorAll('[data-browser-tab]')];
 
   let timers = [];
-  let running = true;
+  let sceneId = 0;
+  let activeScene = null;
+
+  const style = document.createElement('style');
+  style.id = 'chatmargin-demo-v3-style';
+  style.textContent = `
+    .demo-shell::before{
+      content:"Explore the demo · Click any of the four tabs: Notes, Prompts, Dashboard or Search";
+      display:block;
+      padding:10px 14px;
+      background:linear-gradient(90deg,#f6f4ff,#fff,#f6f4ff);
+      border-bottom:1px solid #dedbf6;
+      color:#4b5570;
+      font-size:11px;
+      font-weight:850;
+      text-align:center;
+      letter-spacing:.01em
+    }
+    .demo-stage button,.demo-stage input{pointer-events:none!important;cursor:default!important}
+    .demo-stage .cm-tab{pointer-events:auto!important;cursor:pointer!important;position:relative;z-index:3;transition:transform .2s ease,box-shadow .2s ease,background .2s ease,color .2s ease}
+    .demo-stage .cm-tab:hover,.demo-stage .cm-tab.demo-hover{
+      transform:translateY(-2px) scale(1.035);
+      background:#fff!important;
+      color:#30268e!important;
+      box-shadow:0 0 0 2px rgba(111,92,255,.34),0 0 18px rgba(111,92,255,.42)!important
+    }
+    .demo-invite .cm-tab{animation:cmInvite 2.8s ease-in-out infinite}
+    .demo-invite .cm-tab:nth-child(2){animation-delay:.32s}
+    .demo-invite .cm-tab:nth-child(3){animation-delay:.64s}
+    .demo-invite .cm-tab:nth-child(4){animation-delay:.96s}
+    @keyframes cmInvite{
+      0%,68%,100%{box-shadow:0 0 0 1px rgba(111,92,255,.10);background:transparent}
+      82%{box-shadow:0 0 0 2px rgba(111,92,255,.34),0 0 20px rgba(111,92,255,.34);background:#fff;color:#30268e}
+    }
+    .cursor{
+      display:block!important;
+      opacity:1!important;
+      width:34px;
+      height:38px;
+      z-index:80!important;
+      transition:transform 1.25s cubic-bezier(.22,.8,.25,1),opacity .2s ease!important;
+      filter:none!important
+    }
+    .cursor .arrow{
+      display:block!important;
+      font-size:31px!important;
+      line-height:1!important;
+      color:#fff!important;
+      transform:none!important;
+      -webkit-text-stroke:2px #111827;
+      text-shadow:0 3px 5px rgba(0,0,0,.32)
+    }
+    .cursor .hand{display:none!important}
+    .cursor::after{
+      content:"";
+      position:absolute;
+      width:10px;
+      height:10px;
+      left:5px;
+      top:5px;
+      border:2px solid rgba(111,92,255,.95);
+      border-radius:50%;
+      opacity:0;
+      transform:scale(.5)
+    }
+    .cursor.clicking::after{animation:cmClick .7s ease-out}
+    @keyframes cmClick{0%{opacity:1;transform:scale(.5)}100%{opacity:0;transform:scale(3.6)}}
+    .cursor.dragging .arrow{transform:scale(.9) rotate(-6deg)!important}
+    .demo-running .cm-tab:not(.active){box-shadow:inset 0 0 0 1px rgba(111,92,255,.10)}
+    .demo-status{font-weight:750;font-size:10px}
+    .cm-tab.active{box-shadow:0 0 0 2px rgba(111,92,255,.30),0 5px 14px rgba(111,92,255,.16)!important}
+    @media(max-width:620px){.demo-shell::before{font-size:10px;padding:9px 10px}.cursor{display:none!important}}
+  `;
+  document.head.appendChild(style);
+
+  arrow.textContent = '↖';
+  demo.querySelectorAll('button:not(.cm-tab)').forEach(button => { button.tabIndex = -1; });
 
   const chats = {
     launch: {
@@ -49,43 +124,86 @@
     }
   };
 
-  const later = (fn, ms) => {
-    const id = setTimeout(fn, ms);
-    timers.push(id);
-    return id;
-  };
-  const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+  function clearTimers() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    sceneId += 1;
+  }
 
-  function setCursor(x, y, clicking = false, dragging = false) {
-    cursor.style.transform = `translate(${x}px, ${y}px)`;
-    arrow.style.display = clicking || dragging ? 'none' : 'block';
-    hand.style.display = clicking || dragging ? 'block' : 'none';
-    cursor.classList.toggle('clicking', clicking);
-    cursor.classList.toggle('dragging', dragging);
+  function later(fn, ms, id = sceneId) {
+    const timer = setTimeout(() => {
+      if (id === sceneId) fn();
+    }, ms);
+    timers.push(timer);
+    return timer;
   }
-  function clickPulse() {
-    cursor.classList.add('tap');
-    later(() => cursor.classList.remove('tap'), 260);
+
+  function setProgress(index) {
+    progress.forEach((item, i) => item.classList.toggle('active', i === index));
   }
-  function setProgress(index) { progress.forEach((el, i) => el.classList.toggle('active', i === index)); }
+
   function setTab(name) {
-    tabs.forEach(t => t.classList.toggle('active', t.dataset.demoTab === name));
+    tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.demoTab === name));
     subTabs.hidden = name !== 'notes';
   }
+
   function setChat(key) {
-    const c = chats[key];
-    chatTitle.textContent = c.title;
-    sideChatTitle.textContent = c.title;
-    contextTitle.textContent = c.title;
-    userMsg.textContent = c.user;
-    assistantMsg.textContent = c.assistant;
-    secondUser.textContent = c.user2;
-    secondAssistant.innerHTML = c.assistant2;
+    const chat = chats[key];
+    chatTitle.textContent = chat.title;
+    sideChatTitle.textContent = chat.title;
+    contextTitle.textContent = chat.title;
+    userMsg.textContent = chat.user;
+    assistantMsg.textContent = chat.assistant;
+    secondUser.textContent = chat.user2;
+    secondAssistant.innerHTML = chat.assistant2;
+  }
+
+  function showChat() {
+    workspaceScreen.hidden = true;
+    chatScreen.hidden = false;
+    chromeTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.browserTab === 'chatgpt'));
+  }
+
+  function showWorkspace() {
+    chatScreen.hidden = true;
+    workspaceScreen.hidden = false;
+    chromeTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.browserTab === 'workspace'));
+  }
+
+  function pointFor(element, xRatio = .5, yRatio = .5) {
+    if (!element || chatScreen.hidden) return null;
+    const stage = chatScreen.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
+    const x = rect.left - stage.left + rect.width * xRatio - 8;
+    const y = rect.top - stage.top + rect.height * yRatio - 8;
+    return {
+      x: Math.max(6, Math.min(stage.width - 38, x)),
+      y: Math.max(6, Math.min(stage.height - 42, y))
+    };
+  }
+
+  function moveCursorTo(element, options = {}) {
+    const point = pointFor(element, options.x ?? .5, options.y ?? .5);
+    if (!point) return;
+    cursor.classList.toggle('dragging', Boolean(options.dragging));
+    cursor.style.transform = `translate3d(${point.x}px, ${point.y}px, 0)`;
+  }
+
+  function clickCursor(element, options = {}) {
+    moveCursorTo(element, options);
+    later(() => {
+      cursor.classList.remove('clicking');
+      void cursor.offsetWidth;
+      cursor.classList.add('clicking');
+      later(() => cursor.classList.remove('clicking'), 720);
+    }, 1250);
   }
 
   function notesHtml(step = 0) {
     return `<div class="note-page">
-      <div class="note-toolbar ${step >= 1 ? 'visible' : ''}"><button><strong>B</strong></button><button>H1</button><button>H2</button><button>• List</button><button>☑ To-do</button><button>↗ Link</button></div>
+      <div class="note-toolbar ${step >= 1 ? 'visible' : ''}">
+        <button data-tool="bold"><strong>B</strong></button><button data-tool="h1">H1</button><button data-tool="h2">H2</button><button data-tool="list">• List</button><button data-tool="todo">☑ To-do</button><button data-tool="link">↗ Link</button>
+      </div>
       <div class="note-editor">
         <h3 class="note-heading ${step >= 2 ? 'formatted' : ''}">${step >= 2 ? 'Launch decisions' : 'Launch notes'}</h3>
         <p class="note-copy">Keep the launch simple and learn from real use.</p>
@@ -96,103 +214,267 @@
     </div>`;
   }
 
-  function promptsHtml(order = ['Launch summary', 'Turn notes into actions', 'Find open questions'], highlight = '') {
-    return `<div class="prompt-list">${order.map((name, i) => `<div class="prompt-card ${highlight === name ? 'dragging-card' : ''}"><div class="drag-handle">⋮⋮</div><div><strong>${name}</strong><span>${i === 0 ? 'Summarize this conversation into decisions and next steps.' : i === 1 ? 'Turn these notes into a short action list.' : 'List the unresolved questions in this chat.'}</span></div><button class="send-prompt">Send to ChatGPT</button></div>`).join('')}</div>`;
+  function promptsHtml(order = ['Launch summary', 'Turn notes into actions', 'Find open questions'], draggingName = '') {
+    const descriptions = {
+      'Launch summary': 'Summarize this conversation into decisions and next steps.',
+      'Turn notes into actions': 'Turn these notes into a short action list.',
+      'Find open questions': 'List the unresolved questions in this chat.'
+    };
+    return `<div class="prompt-list">${order.map((name, index) => `<div class="prompt-card ${draggingName === name ? 'dragging-card' : ''}" data-prompt="${index}"><div class="drag-handle">⋮⋮</div><div><strong>${name}</strong><span>${descriptions[name]}</span></div><button class="send-prompt" data-send="${index}">Send to ChatGPT</button></div>`).join('')}</div>`;
   }
 
   function dashboardHtml() {
-    return `<div class="dashboard-demo"><div class="dash-filters"><button class="active">All</button><button>High priority</button><button>Product launch</button></div>
-      <button class="dash-row"><span class="dot high"></span><div><strong>User interview synthesis</strong><span>High priority · Follow-up</span></div></button>
-      <button class="dash-row"><span class="dot medium"></span><div><strong>SEO content plan</strong><span>Medium priority · Follow-up</span></div></button>
-      <button class="dash-row"><span class="dot low"></span><div><strong>Website launch plan</strong><span>Low priority · Open</span></div></button></div>`;
+    return `<div class="dashboard-demo"><div class="dash-filters"><button class="active" data-filter="all">All</button><button data-filter="high">High priority</button><button data-filter="project">Product launch</button></div>
+      <button class="dash-row" data-chat="research"><span class="dot high"></span><div><strong>User interview synthesis</strong><span>High priority · Follow-up</span></div></button>
+      <button class="dash-row" data-chat="seo"><span class="dot medium"></span><div><strong>SEO content plan</strong><span>Medium priority · Follow-up</span></div></button>
+      <button class="dash-row" data-chat="launch"><span class="dot low"></span><div><strong>Website launch plan</strong><span>Low priority · Open</span></div></button></div>`;
   }
 
   function searchHtml(query = '') {
-    return `<div class="search-demo"><div class="search-box"><span>⌕</span><span class="query">${query || 'Search notes, prompts and conversations...'}</span></div>${query ? `<div class="search-results"><button><small>CONVERSATION</small><strong>SEO content plan</strong><span>Questions people ask about ChatGPT workflow...</span></button><button><small>NOTE</small><strong>Launch decisions</strong><span>Publish local-first trust messaging...</span></button><button><small>PROMPT</small><strong>Find open questions</strong><span>List the unresolved questions in this chat.</span></button></div>` : ''}</div>`;
+    return `<div class="search-demo"><div class="search-box"><span>⌕</span><span class="query">${query || 'Search notes, prompts and conversations...'}</span></div>${query ? `<div class="search-results"><button data-result="conversation"><small>CONVERSATION</small><strong>SEO content plan</strong><span>Questions people ask about ChatGPT workflow...</span></button><button data-result="note"><small>NOTE</small><strong>Launch decisions</strong><span>Publish local-first trust messaging...</span></button><button data-result="prompt"><small>PROMPT</small><strong>Find open questions</strong><span>List the unresolved questions in this chat.</span></button></div>` : ''}</div>`;
   }
 
-  function showWorkspace() {
-    chatScreen.hidden = true;
-    workspaceScreen.hidden = false;
-    chromeTabs.forEach(t => t.classList.toggle('active', t.dataset.browserTab === 'workspace'));
-  }
-  function showChat() {
-    workspaceScreen.hidden = true;
-    chatScreen.hidden = false;
-    chromeTabs.forEach(t => t.classList.toggle('active', t.dataset.browserTab === 'chatgpt'));
-  }
-
-  function resetVisuals() {
+  function resetCommon(name) {
     showChat();
     setChat('launch');
+    assistantMsg.classList.remove('selected-text');
     composerText.textContent = 'Ask anything';
     composerText.classList.remove('filled');
+    tabs.forEach(tab => tab.classList.remove('demo-hover'));
+    demo.classList.remove('demo-invite');
+    demo.classList.add('demo-running');
+    setTab(name);
+    setProgress(['notes', 'prompts', 'dashboard', 'search'].indexOf(name));
+  }
+
+  function finishAndLoop(name, message, delay = 3800) {
+    status.textContent = `${message} Click another tab anytime, or watch this one replay.`;
+    demo.classList.remove('demo-running');
+    tabs.filter(tab => tab.dataset.demoTab !== name).forEach(tab => tab.classList.add('demo-hover'));
+    const id = sceneId;
+    later(() => startScene(name), delay, id);
+  }
+
+  function runNotes(id) {
+    resetCommon('notes');
+    panelBody.innerHTML = notesHtml(0);
+    status.textContent = 'Notes 1/6 · Select useful context from the ChatGPT conversation.';
+
+    later(() => {
+      moveCursorTo(assistantMsg, { x: .15, y: .55 });
+    }, 900, id);
+
+    later(() => {
+      cursor.classList.add('dragging');
+      moveCursorTo(assistantMsg, { x: .86, y: .55, dragging: true });
+      assistantMsg.classList.add('selected-text');
+    }, 2600, id);
+
+    later(() => {
+      status.textContent = 'Notes 2/6 · Bring the useful passage into the note beside the chat.';
+      cursor.classList.remove('dragging');
+      panelBody.innerHTML = notesHtml(1);
+      assistantMsg.classList.remove('selected-text');
+      moveCursorTo(panelBody.querySelector('.imported'), { x: .65, y: .5 });
+    }, 4800, id);
+
+    later(() => {
+      status.textContent = 'Notes 3/6 · Format the note with headings and structure.';
+      const h1 = panelBody.querySelector('[data-tool="h1"]');
+      clickCursor(h1);
+    }, 6800, id);
+
+    later(() => {
+      panelBody.innerHTML = notesHtml(2);
+      const list = panelBody.querySelector('[data-tool="list"]');
+      clickCursor(list);
+    }, 8600, id);
+
+    later(() => {
+      panelBody.innerHTML = notesHtml(3);
+      status.textContent = 'Notes 4/6 · Add a checklist for concrete next steps.';
+      const todo = panelBody.querySelector('[data-tool="todo"]');
+      clickCursor(todo);
+    }, 10400, id);
+
+    later(() => {
+      panelBody.innerHTML = notesHtml(4);
+      status.textContent = 'Notes 5/6 · Create sub-pages when the work becomes more complex.';
+      const add = demo.querySelector('.add-subpage');
+      clickCursor(add);
+    }, 12300, id);
+
+    later(() => {
+      const button = demo.querySelector('.subpage-btn');
+      button.textContent = 'Launch checklist';
+      button.classList.add('active');
+      demo.querySelector('.cm-subtabs > button:first-child').classList.remove('active');
+      status.textContent = 'Notes 6/6 · Open the same note in the full Workspace when you need more room.';
+      clickCursor(demo.querySelector('[data-open-workspace]'));
+    }, 14400, id);
+
+    later(() => {
+      showWorkspace();
+    }, 16300, id);
+
+    later(() => {
+      showChat();
+      setTab('notes');
+      setProgress(0);
+      finishAndLoop('notes', 'Notes demo complete.');
+    }, 19700, id);
+  }
+
+  function runPrompts(id) {
+    resetCommon('prompts');
+    panelBody.innerHTML = promptsHtml();
+    status.textContent = 'Prompts 1/3 · Choose a saved prompt and send it to the ChatGPT composer.';
+
+    later(() => {
+      const send = panelBody.querySelector('[data-send="0"]');
+      clickCursor(send);
+    }, 1100, id);
+
+    later(() => {
+      composerText.textContent = 'Summarize this conversation into decisions and next steps.';
+      composerText.classList.add('filled');
+      status.textContent = 'Prompts 2/3 · The prompt is inserted into ChatGPT without retyping it.';
+      moveCursorTo(composerText, { x: .55, y: .5 });
+    }, 3300, id);
+
+    later(() => {
+      status.textContent = 'Prompts 3/3 · Drag prompts to keep the most useful ones where you want them.';
+      const secondHandle = panelBody.querySelectorAll('.drag-handle')[1];
+      moveCursorTo(secondHandle, { dragging: true });
+      panelBody.innerHTML = promptsHtml(['Launch summary', 'Turn notes into actions', 'Find open questions'], 'Turn notes into actions');
+    }, 5600, id);
+
+    later(() => {
+      const firstCard = panelBody.querySelector('.prompt-card');
+      moveCursorTo(firstCard, { x: .2, y: .5, dragging: true });
+    }, 7300, id);
+
+    later(() => {
+      cursor.classList.remove('dragging');
+      panelBody.innerHTML = promptsHtml(['Turn notes into actions', 'Launch summary', 'Find open questions']);
+      finishAndLoop('prompts', 'Prompts demo complete.');
+    }, 9200, id);
+  }
+
+  function runDashboard(id) {
+    resetCommon('dashboard');
+    panelBody.innerHTML = dashboardHtml();
+    status.textContent = 'Dashboard 1/3 · Filter unfinished work by priority.';
+
+    later(() => {
+      const high = panelBody.querySelector('[data-filter="high"]');
+      clickCursor(high);
+    }, 1200, id);
+
+    later(() => {
+      const filters = panelBody.querySelectorAll('.dash-filters button');
+      filters.forEach(button => button.classList.remove('active'));
+      panelBody.querySelector('[data-filter="high"]').classList.add('active');
+      status.textContent = 'Dashboard 2/3 · Open a follow-up and the ChatGPT conversation changes with it.';
+      clickCursor(panelBody.querySelector('[data-chat="research"]'));
+    }, 3600, id);
+
+    later(() => {
+      setChat('research');
+    }, 5400, id);
+
+    later(() => {
+      status.textContent = 'Dashboard 3/3 · Jump to another unfinished conversation without losing the thread.';
+      clickCursor(panelBody.querySelector('[data-chat="seo"]'));
+    }, 7000, id);
+
+    later(() => {
+      setChat('seo');
+      finishAndLoop('dashboard', 'Dashboard demo complete.');
+    }, 9000, id);
+  }
+
+  function runSearch(id) {
+    resetCommon('search');
+    panelBody.innerHTML = searchHtml('');
+    status.textContent = 'Search 1/3 · Search across known conversations, notes and prompts.';
+
+    later(() => {
+      moveCursorTo(panelBody.querySelector('.search-box'), { x: .42, y: .5 });
+    }, 1100, id);
+
+    later(() => {
+      panelBody.innerHTML = searchHtml('local');
+    }, 2700, id);
+    later(() => {
+      panelBody.innerHTML = searchHtml('local-first');
+      status.textContent = 'Search 2/3 · Results show where the match comes from: conversation, note or prompt.';
+    }, 4100, id);
+
+    later(() => {
+      const result = panelBody.querySelector('[data-result="conversation"]');
+      clickCursor(result);
+      result.classList.add('selected-result');
+      status.textContent = 'Search 3/3 · Open the result and jump back into the relevant ChatGPT conversation.';
+    }, 5900, id);
+
+    later(() => {
+      setChat('seo');
+      finishAndLoop('search', 'Search demo complete.');
+    }, 8200, id);
+  }
+
+  function startScene(name) {
+    clearTimers();
+    activeScene = name;
+    const id = sceneId;
+    if (name === 'notes') runNotes(id);
+    if (name === 'prompts') runPrompts(id);
+    if (name === 'dashboard') runDashboard(id);
+    if (name === 'search') runSearch(id);
+  }
+
+  function startInvite(index = 0) {
+    clearTimers();
+    activeScene = null;
+    showChat();
+    setChat('launch');
     panelBody.innerHTML = notesHtml(0);
     setTab('notes');
-    setCursor(485, 250);
+    setProgress(-1);
+    composerText.textContent = 'Ask anything';
+    composerText.classList.remove('filled');
+    demo.classList.remove('demo-running');
+    demo.classList.add('demo-invite');
+    status.textContent = 'Click Notes, Prompts, Dashboard or Search to see a slow guided demo.';
+
+    const guide = step => {
+      if (activeScene) return;
+      tabs.forEach(tab => tab.classList.remove('demo-hover'));
+      const tab = tabs[step % tabs.length];
+      tab.classList.add('demo-hover');
+      moveCursorTo(tab);
+      later(() => guide(step + 1), 2500);
+    };
+    later(() => guide(index), 500);
   }
 
-  function runNotes() {
-    setProgress(0); setTab('notes'); setChat('launch'); panelBody.innerHTML = notesHtml(0);
-    status.textContent = 'Notes: capture, format and structure context beside the chat.';
-    setCursor(190, 245);
-    later(() => { assistantMsg.classList.add('selected-text'); setCursor(260, 245, false, true); }, 1000);
-    later(() => { panelBody.innerHTML = notesHtml(1); assistantMsg.classList.remove('selected-text'); setCursor(715, 276, true); clickPulse(); }, 2500);
-    later(() => { panelBody.innerHTML = notesHtml(2); setCursor(695, 205, true); clickPulse(); }, 4200);
-    later(() => { panelBody.innerHTML = notesHtml(3); setCursor(760, 205, true); clickPulse(); }, 5800);
-    later(() => { panelBody.innerHTML = notesHtml(4); setCursor(812, 205, true); clickPulse(); }, 7400);
-    later(() => {
-      const add = demo.querySelector('.add-subpage'); add.classList.add('pulse-control'); setCursor(902, 171, true); clickPulse();
-      later(() => { add.classList.remove('pulse-control'); const btn = demo.querySelector('.subpage-btn'); btn.textContent = 'Launch checklist'; btn.classList.add('active'); demo.querySelector('.cm-subtabs > button:first-child').classList.remove('active'); }, 450);
-    }, 9000);
-    later(() => { setCursor(880, 58, true); clickPulse(); status.textContent = 'Workspace: open the same note in a larger writing surface.'; showWorkspace(); }, 10800);
-    later(() => { showChat(); status.textContent = 'Notes: capture, format and structure context beside the chat.'; }, 13200);
-    later(runPrompts, 14500);
-  }
+  tabs.forEach(tab => {
+    tab.addEventListener('click', event => {
+      event.preventDefault();
+      startScene(tab.dataset.demoTab);
+    });
+  });
 
-  function runPrompts() {
-    setProgress(1); setTab('prompts'); panelBody.innerHTML = promptsHtml();
-    status.textContent = 'Prompts: reuse, insert and reorder the prompts you actually use.';
-    setCursor(700, 126, true); clickPulse();
-    later(() => { setCursor(905, 250, true); clickPulse(); composerText.textContent = 'Summarize this conversation into decisions and next steps.'; composerText.classList.add('filled'); }, 1700);
-    later(() => { setCursor(692, 323, false, true); panelBody.innerHTML = promptsHtml(['Launch summary', 'Turn notes into actions', 'Find open questions'], 'Turn notes into actions'); }, 3600);
-    later(() => { panelBody.innerHTML = promptsHtml(['Turn notes into actions', 'Launch summary', 'Find open questions']); setCursor(692, 245, true); clickPulse(); }, 5100);
-    later(() => { const first = panelBody.querySelector('.prompt-card'); first.classList.toggle('collapsed'); }, 6800);
-    later(runDashboard, 8300);
-  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearTimers();
+    } else if (activeScene) {
+      startScene(activeScene);
+    } else {
+      startInvite();
+    }
+  });
 
-  function runDashboard() {
-    setProgress(2); setTab('dashboard'); panelBody.innerHTML = dashboardHtml();
-    status.textContent = 'Dashboard: return to unfinished conversations by priority and project.';
-    setCursor(812, 126, true); clickPulse();
-    later(() => { const buttons = panelBody.querySelectorAll('.dash-filters button'); buttons[1].classList.add('active'); buttons[0].classList.remove('active'); setCursor(760, 205, true); clickPulse(); }, 1700);
-    later(() => { setCursor(805, 276, true); clickPulse(); setChat('research'); }, 3500);
-    later(() => { setCursor(808, 332, true); clickPulse(); setChat('seo'); }, 5500);
-    later(runSearch, 7400);
-  }
-
-  function runSearch() {
-    setProgress(3); setTab('search'); panelBody.innerHTML = searchHtml('');
-    status.textContent = 'Search: find conversations, notes and prompts from one place.';
-    setCursor(912, 126, true); clickPulse();
-    later(() => { panelBody.innerHTML = searchHtml('local-first'); setCursor(760, 206, true); clickPulse(); }, 1700);
-    later(() => { const result = panelBody.querySelector('.search-results button'); result.classList.add('selected-result'); setCursor(780, 277, true); clickPulse(); setChat('seo'); }, 3700);
-    later(() => { if (running) runNotes(); }, 6200);
-  }
-
-  function startFromScene(scene) {
-    clearTimers(); running = true;
-    if (scene === 'notes') runNotes();
-    if (scene === 'prompts') runPrompts();
-    if (scene === 'dashboard') runDashboard();
-    if (scene === 'search') runSearch();
-  }
-
-  tabs.forEach(tab => tab.addEventListener('click', () => startFromScene(tab.dataset.demoTab)));
-  demo.querySelectorAll('[data-open-workspace]').forEach(btn => btn.addEventListener('click', () => { clearTimers(); running = false; showWorkspace(); status.textContent = 'Workspace: the same note, opened in a larger writing surface.'; }));
-  chromeTabs.forEach(tab => tab.addEventListener('click', () => { clearTimers(); running = false; tab.dataset.browserTab === 'workspace' ? showWorkspace() : showChat(); }));
-  document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimers(); else { resetVisuals(); running = true; runNotes(); } });
-
-  resetVisuals();
-  runNotes();
+  startInvite();
 })();
